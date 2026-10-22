@@ -194,3 +194,10 @@ test("a picture the desk posted is described as its own page, not a site photo",
   assert.match(desk, /picture the desk itself posted/);
   assert.doesNotMatch(person, /picture the desk itself posted/);
 });
+
+test("the desk's photo reminder stays a reminder, not a list page", () => {
+  const caption = "⚠️ Issue #191 [P2] still open\nDatetime: 20-Oct-2026 17:13\nLocation: Road beside Block A\nDescription: Bus plate is broken, creating a vehicular hazard\n@Darrell please follow up.";
+  const out = renderConversation(buildConversation({ message: { body: "done", type: "image", hasPhoto: true }, quoted: { messageIdSerialized: "true_1", type: "image", body: caption } }));
+  assert.match(out, /reminder that issue #191 \(P2\) is still open/);
+  assert.doesNotMatch(out, /picture the desk itself posted/);
+});
