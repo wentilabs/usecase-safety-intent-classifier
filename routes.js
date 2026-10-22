@@ -27,7 +27,8 @@ async function route(method, path, query, body) {
   if (method === "GET" && section) {
     const spec = DOMAINS[section[1]];
     if (!spec) return json(404, { error: `unknown domain "${section[1]}"` });
-    const { text, intents } = renderSection(spec, { "project.requiresSeverity": query.requiresSeverity === "true" });
+    // ?seed=… shuffles intents and examples; a composer should shuffle per message (no ordering bias).
+    const { text, intents } = renderSection(spec, { "project.requiresSeverity": query.requiresSeverity === "true" }, query.seed ?? null);
     return json(200, {
       domain: spec.domain,
       version: spec.version,
