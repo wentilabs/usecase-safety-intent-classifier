@@ -12,6 +12,9 @@
  * Each domain contributes its intents, instructions and examples; ONE `other` intent is
  * added by the composer (lib/compose.js), never by a domain.
  *
+ * `offeredOnlyWhen` keeps an intent out of the choice entirely unless the caller supplied
+ * those facts — for intents that only exist under a project setting (a required severity).
+ *
  * `requires` lists the FACTS an intent cannot exist without. lib/validate.js uses it to
  * refuse an intent the facts contradict. A fact the caller did not supply is "unknown"
  * and never refutes anything — the model's judgement stands.
@@ -67,6 +70,8 @@ const SAFETY_DOMAIN = {
       signals: ["a new issue in every other respect", "this project requires a stated severity", "no P1/P2/P3 is stated"],
       notWhen: ["the project does not require a severity"],
       requires: { all: { "project.requiresSeverity": true, "message.statedSeverity": null, "message.hasText": true, "message.isDeletion": false } },
+      // Configuration, not meaning: only offered when the caller says the project requires a severity.
+      offeredOnlyWhen: { "project.requiresSeverity": true },
     },
 
     // ── closing ─────────────────────────────────────────────────────────────
@@ -208,6 +213,7 @@ const SAFETY_DOMAIN = {
     "quoted.systemMessage": "issue_reminder | photo_request | pic_question | message — only when sent by the desk",
     "quoted.issueNumber": "for a desk reminder, the issue it names",
     "quoted.isPhoto": "the quoted message is itself a photo",
+    "quoted.media": "photo | video | document | voice note | sticker | none — what the quoted message carried",
     "quotedIssue.status": "open | closed | not_an_issue — the register's answer about the quoted message",
     "earlierPhoto.unrecorded": "this message describes an earlier photo that had no description and was never recorded",
     "original.effect": "for an edit or deletion: created_issue | closed_issue | added_after_photo | answered_pic | none",
