@@ -5,6 +5,8 @@
  *
  *   GET  /domains                    the domains this service knows
  *   GET  /domains/:name              one domain's spec, as-is
+ *   GET  /domains/:name/prompt       that domain's prompt SECTION, ready to sit beside other domains'
+ *                                    (no role, no `other` — those belong to the composer)
  *   GET  /spec?domains=safety,…      the composed task: intents of every requested domain + one `other`
  *   POST /classify                   { domains, message, recent, quoted, facts, model? } → one intent
  */
@@ -12,6 +14,7 @@
 const { DOMAINS } = require("./domains");
 const { compose } = require("./lib/compose");
 const { classify } = require("./lib/classify");
+const { renderSection } = require("./lib/prompt");
 
 const json = (status, body) => ({ status, body });
 const domainList = (q) => String(q || "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -19,6 +22,20 @@ const domainList = (q) => String(q || "").split(",").map((s) => s.trim()).filter
 async function route(method, path, query, body) {
   if (method === "GET" && path === "/domains") {
     return json(200, { domains: Object.values(DOMAINS).map((d) => ({ domain: d.domain, version: d.version, title: d.title, intents: d.intents.length })) });
+  }
+  const section = /^\/domains\/([a-z0-9_-]+)\/prompt$/.exec(path);
+  if (method === "GET" && section) {
+    const spec = DOMAINS[section[1]];
+    if (!spec) return json(404, { error: `unknown domain "${section[1]}"` });
+    const { text, intents } = renderSection(spec, { "project.requiresSeverity": query.requiresSeverity === "true" });
+    return json(200, {
+      domain: spec.domain,
+      version: spec.version,
+      intents,                               // the ids to add to the composer's answer enum
+      section: text,                         // place beside other domains' sections
+      corrections: spec.corrections,         // how edits and deletions map, applied after classifying the original
+      chars: text.length,
+    });
   }
   const one = /^\/domains\/([a-z0-9_-]+)$/.exec(path);
   if (method === "GET" && one) {

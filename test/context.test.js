@@ -81,3 +81,23 @@ test("the payload's own clientIdentifier decides which listener's copy is 'ours'
   const { request } = await fillContext({ message: { from: G, clientIdentifier: "OTHER", body: "x", timestamp: 130, quotedMessageId: "r1" } }, deps);
   assert.strictEqual(request.quoted.fromThisSystem, false, "from OTHER's point of view, r1 was not sent by it");
 });
+
+test("retrieval is best-effort: a failing archive leaves gaps, reports them, never throws", async () => {
+  const fetchImpl = async () => ({ ok: false, status: 503, text: async () => "down" });
+  const r = await fillContext({ message: { from: G, body: "done", timestamp: 130, quotedMessageId: "r1" } }, { url: "https://x", key: "k", ours: "C1", fetchImpl });
+  assert.strictEqual(r.request.recent, undefined);
+  assert.strictEqual(r.request.quoted, undefined);
+  assert.strictEqual(r.missed.length, 2);
+  assert.match(r.missed[0], /503/);
+});
+
+test("the desk's own messages are part of the earlier context", async () => {
+  const deskAsks = [
+    { from: G, messageId: "q1", messageIdSerialized: "true_q1", body: "👤 Who should this safety issue be assigned to?", timestamp: 200, clientIdentifier: "C1" },
+  ];
+  const { deps } = fakeArchive(deskAsks);
+  const { request } = await fillContext({ message: { from: G, messageId: "a1", body: "Mohamed Shafiee 6591234567", timestamp: 210 } }, deps);
+  assert.strictEqual(request.recent.length, 1);
+  assert.strictEqual(request.recent[0].fromThisSystem, true);
+  assert.match(request.recent[0].body, /Who should this safety issue be assigned to/);
+});

@@ -77,3 +77,14 @@ test("HTTP: domains, one domain, composed spec, errors", async () => {
   assert.strictEqual((await handle("GET", "/domains/safety")).body.corrections.deletion.closure, "deleted_closure");
   assert.strictEqual((await handle("GET", "/spec", { domains: "safety,nope" })).status, 400);
 });
+
+test("GET /domains/safety/prompt: a self-contained section, nothing generic in it", async () => {
+  const r = await handle("GET", "/domains/safety/prompt");
+  assert.strictEqual(r.status, 200);
+  assert.match(r.body.section, /^## Domain: safety/);
+  assert.doesNotMatch(r.body.section, /When none applies|classify tool|scrolling up/, "no role, no other, no answer instruction");
+  assert.ok(r.body.intents.includes("safety.closure"));
+  assert.ok(!r.body.intents.includes("safety.new_issue_missing_severity"), "project-conditional unless asked");
+  assert.ok((await handle("GET", "/domains/safety/prompt", { requiresSeverity: "true" })).body.intents.includes("safety.new_issue_missing_severity"));
+  assert.strictEqual(r.body.corrections.deletion.closure, "deleted_closure");
+});
