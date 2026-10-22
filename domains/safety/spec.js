@@ -86,6 +86,7 @@ const SAFETY_DOMAIN = {
         "it reports something wrong that still needs fixing (that is a new issue)",
         "it closes a recorded issue (that is a closure)",
         "a toolbox-meeting or briefing ATTENDANCE record, a start card or a sign-off sheet",
+        "a water parade (workers drinking water on a schedule) — that is a separate record, not safety"
       ],
       requires: { all: { "message.hasText": true, "message.hasPhoto": true } },
     },

@@ -33,7 +33,7 @@ if (!casesPath) { console.error("usage: eval/run.js <decision-cases.json> [--tod
 
 /** Which of this service's intents count as matching each base-template label. */
 const ACCEPTS = {
-  create_issue: ["new_issue", "new_issue_missing_pic"],
+  create_issue: ["new_issue", "new_issue_missing_pic", "good_observation"], // good observations were filed as issues
   ask_for_photo: ["new_issue_missing_photo"],
   close_issue: ["closure", "closure_missing_photo", "closure_missing_description", "late_after_photo"],
   copy_issue: ["recurrence"],
