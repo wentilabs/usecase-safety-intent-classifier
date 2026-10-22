@@ -193,6 +193,7 @@ const SAFETY_DOMAIN = {
     "People write fast, in fragments, with typos, Singlish, mixed languages and @mentions. Read for meaning, not grammar.",
     "If the message is about something else entirely — workforce numbers, scheduling, greetings, other teams' business — it is not a safety intent.",
     "These look like safety but never are, with or without a photo: a facility's status (carpark full, gate closed, lift out of service); security patrol or gate-status logs; planning and coordination (scheduling, deliveries, meetings, go-aheads); progress updates and shift digests; weather advisories, even urgent stop-work or take-shelter instructions; reminders about already-tracked items, including screenshots of a register, hazard log or tracker; automated alerts (heat, noise, report reminders); chatter; who arrived, left or is on site; toolbox-meeting, briefing or start-card attendance records.",
+    "Requests and directives are judged by what they are about. About logistics or coordination — deliveries, schedules, 'please send manpower' — they are not safety. When the words or the photo show a condition that is unsafe right now — rubble on a walkway, no safe access for a lifting crew, a missing fire extinguisher stand — the request or directive is how the sender reports it.",
     "A picture of a list — a register, tracker or the desk's own open-issues page — is not a photo of the site. A reply to one is about items already tracked, never a new report.",
   ],
 
@@ -213,6 +214,7 @@ const SAFETY_DOMAIN = {
     { message: 'Photo: "weekly crawler crane boomdown inspection has been completed. Witness by WH WSHS"', facts: "fresh message, photo attached", intent: "good_observation", why: "A completed, witnessed inspection the site keeps on record." },
     { message: '"Lightning alert CAT 1 now. Stop all lifting, all workers take shelter"', facts: "fresh message, no photo", intent: "other", why: "A weather advisory; the danger is the weather, not a condition on site." },
     { message: '"hang up fire extinguisher"', facts: "replies to a picture the desk itself posted", intent: "other", why: "The desk posts its register pages; this is follow-up on an item already tracked." },
+    { message: '"pls arrange 6 more workers for tmr concreting"', facts: "fresh message, no photo", intent: "other", why: "A coordination request; nothing unsafe is described." },
     { message: 'Photo: "TOL 2 Carpark Full"', facts: "fresh message, photo attached", intent: "other", why: "A capacity notice; nothing is unsafe." },
     { message: 'Photo: "P1 pump room housekeeping area"', facts: "fresh message, photo attached, nobody named", intent: "new_issue_missing_pic", why: "A stated priority on a named area flags a problem; the photo may not make it obvious to an outsider, and does not need to." },
   ],
