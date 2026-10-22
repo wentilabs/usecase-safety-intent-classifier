@@ -75,3 +75,10 @@ test("sentByUs: our row's true_ only", () => {
   assert.strictEqual(sentByUs({ messageIdSerialized: "true_x", clientIdentifier: "OTHER" }, "C1"), false);
   assert.strictEqual(sentByUs({ messageIdSerialized: "true_x" }, "C1"), true, "legacy rows without a clientIdentifier");
 });
+
+test("the payload's own clientIdentifier decides which listener's copy is 'ours'", async () => {
+  const { deps } = fakeArchive(rows);
+  delete deps.ours;
+  const { request } = await fillContext({ message: { from: G, clientIdentifier: "OTHER", body: "x", timestamp: 130, quotedMessageId: "r1" } }, deps);
+  assert.strictEqual(request.quoted.fromThisSystem, false, "from OTHER's point of view, r1 was not sent by it");
+});
