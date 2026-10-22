@@ -46,6 +46,10 @@ needs:
 
 `other` is added once by the composition: "none of the requested domains applies".
 
+With several domains, `POST /classify` judges in two steps: each domain alone first
+(its own intents and `other`), then only the domains that did not say `other`, together.
+None left gives `other`; one left, its answer stands. Each first answer is returned in `perDomain`.
+
 ## Safety intents
 
 | intent | meaning |
