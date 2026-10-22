@@ -201,3 +201,8 @@ test("the desk's photo reminder stays a reminder, not a list page", () => {
   assert.match(out, /reminder that issue #191 \(P2\) is still open/);
   assert.doesNotMatch(out, /picture the desk itself posted/);
 });
+
+test("a reply to an uncaptioned photo is told the photo has no caption", () => {
+  const out = renderConversation(buildConversation({ message: { body: "open riser at grid C4, no cover" }, quoted: { messageIdSerialized: "false_1", type: "image", body: "" } }));
+  assert.match(out, /photo sent with no caption/);
+});

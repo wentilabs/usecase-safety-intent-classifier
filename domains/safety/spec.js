@@ -188,7 +188,7 @@ const SAFETY_DOMAIN = {
   instructions: [
     "Judge a reply by what it SAYS, not by the fact that it is a reply. Replying is just how people talk in a group chat.",
     "A reply about a recorded issue is about that issue — closing it, sending its after-photo, saying it happened again. Only treat it so when the facts say the quoted message is a recorded issue.",
-    "A reply can still carry a NEW issue: when it answers the desk's request for a photo, when it describes an earlier photo that has no description yet, or when it brings its own photo and words describing a different hazard. A hazard mentioned in passing in a reply, with no photo of its own, is not recorded.",
+    "A reply can still carry a NEW issue: when it answers the desk's request for a photo, when it describes an earlier photo that has no description yet, or when it brings its own photo and words describing a different hazard.",
     "The words decide, not the photo. A hazardous-looking photo with 'good morning' is not a report; a terse '@person FE stand' or 'P1 housekeeping area' under a photo is — the sender is flagging something, even when the photo means little to an outsider.",
     "A promise, an acknowledgement or a question is never a closure. Only words that claim the work is done.",
     "People write fast, in fragments, with typos, Singlish, mixed languages and @mentions. Read for meaning, not grammar.",
