@@ -1,8 +1,35 @@
 # Safety intent classifier
 
-Safety-intent classification as a service. Give it a site group-chat message — plus
-whatever related messages and context you have — and it returns **one intent**: what
-the sender means, in safety terms.
+> **With the message just sent, the two text messages before it, and whatever it is
+> replying to, a model can tell exactly what the sender intends — without hard rules.**
+
+That sentence is the whole repo. Everything here exists to give a model that slice of
+conversation, well described, and to measure how accurately it reads it.
+
+## What goes in
+
+    {
+      "domains": ["safety"],
+      "message": { … the message just sent … },
+      "recent":  [ { … }, { … } ],      // the two previous messages that have text, oldest first
+      "quoted":  { … },                 // the message it replies to, if any
+      "facts":   { … }                  // optional: what the caller happens to know
+    }
+
+The two previous text bodies are the point. They carry what a person scrolling up would
+see — a photo's description sent a moment after it, a "same" that only makes sense
+after the line above, the question an answer is answering. The model reads them; no
+rule has to anticipate them.
+
+`facts` are optional and never required: "the quoted message is recorded issue #12,
+open", "the deleted message closed issue #7". Anything not supplied is unknown, and the
+model decides from the conversation.
+
+## What comes out
+
+    { "intent": "safety.closure", "reason": "…", "confidence": 92 }
+
+One intent from the requested domains, or `other`.
 
 It is deliberately narrow. It does not fetch anything, write anything, or reply to
 anyone. What comes before it (gathering context) and after it (acting on the intent)
