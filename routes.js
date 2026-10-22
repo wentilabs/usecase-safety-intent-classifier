@@ -6,11 +6,12 @@
  *   GET  /domains                    the domains this service knows
  *   GET  /domains/:name              one domain's spec, as-is
  *   GET  /spec?domains=safety,…      the composed task: intents of every requested domain + one `other`
- *   POST /classify                   (added with the classifier)
+ *   POST /classify                   { domains, message, recent, quoted, facts, model? } → one intent
  */
 
 const { DOMAINS } = require("./domains");
 const { compose } = require("./lib/compose");
+const { classify } = require("./lib/classify");
 
 const json = (status, body) => ({ status, body });
 const domainList = (q) => String(q || "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -30,6 +31,10 @@ async function route(method, path, query, body) {
       domains: domains.map((d) => ({ domain: d.domain, version: d.version, summary: d.summary, instructions: d.instructions, examples: d.examples, features: d.features })),
       intents,
     });
+  }
+  if (method === "POST" && path === "/classify") {
+    if (!body || typeof body !== "object") return json(400, { error: "send a JSON body: { domains, message, recent, quoted, facts }" });
+    return json(200, await classify(body));
   }
   return json(404, { error: "not found" });
 }
