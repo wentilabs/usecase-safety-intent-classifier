@@ -74,6 +74,22 @@ const SAFETY_DOMAIN = {
       offeredOnlyWhen: { "project.requiresSeverity": true },
     },
 
+    {
+      id: "good_observation",
+      meaning: "Records a safety activity done or a control in place, deliberately kept on record: housekeeping done, a barricade installed, an inspection completed and witnessed, a fire drill held, someone seen working safely.",
+      signals: [
+        "words say a safety activity was done, is underway, or a control is in place",
+        "a photo of it",
+        "often an FYI tone: 'completed', 'done', 'conducted', 'witness by', 'photos'",
+      ],
+      notWhen: [
+        "it reports something wrong that still needs fixing (that is a new issue)",
+        "it closes a recorded issue (that is a closure)",
+        "a toolbox-meeting or briefing ATTENDANCE record, a start card or a sign-off sheet",
+      ],
+      requires: { all: { "message.hasText": true, "message.hasPhoto": true } },
+    },
+
     // ── closing ─────────────────────────────────────────────────────────────
     {
       id: "closure",
@@ -143,6 +159,7 @@ const SAFETY_DOMAIN = {
       new_issue: "deleted_new_issue",
       new_issue_missing_pic: "deleted_new_issue",
       recurrence: "deleted_new_issue",
+      good_observation: "deleted_good_observation",
       closure: "deleted_closure",
       late_after_photo: "deleted_after_photo",
       pic_answer: "deleted_pic_answer",
@@ -151,15 +168,18 @@ const SAFETY_DOMAIN = {
       new_issue: "edited_new_issue",
       new_issue_missing_pic: "edited_new_issue",
       recurrence: "edited_new_issue",
+      good_observation: "edited_good_observation",
       closure: "edited_closure",
     },
     intents: {
       deleted_new_issue: "Deletes a message that created an issue (including a 'same' copy). Undo the issue.",
       deleted_closure: "Deletes a message that closed an issue. Undo the closure.",
       deleted_after_photo: "Deletes a message that added an after-photo to a closed issue. Undo the photo.",
+      deleted_good_observation: "Deletes a message that recorded a good observation. Undo the record.",
       deleted_pic_answer: "Deletes a message that named the person responsible. Undo the assignment.",
       edited_new_issue: "Edits a message that created an issue. The record follows the corrected text.",
       edited_closure: "Edits a message that closed an issue.",
+      edited_good_observation: "Edits a message that recorded a good observation. The record follows the corrected text.",
     },
   },
 
@@ -187,6 +207,7 @@ const SAFETY_DOMAIN = {
     { message: '"same again"', facts: "replies to a recorded CLOSED issue", intent: "recurrence", why: "The same problem has come back." },
     { message: '"Mohamed Shafiee 6591234567"', facts: "replies to the desk's '👤 Who should this safety issue be assigned to?'", intent: "pic_answer", why: "Names the person responsible." },
     { message: '"will settle by tmr"', facts: "replies to a recorded OPEN issue", intent: "other", why: "A promise is not a fix." },
+    { message: 'Photo: "weekly crawler crane boomdown inspection has been completed. Witness by WH WSHS"', facts: "fresh message, photo attached", intent: "good_observation", why: "A completed, witnessed inspection the site keeps on record." },
     { message: 'Photo: "TOL 2 Carpark Full"', facts: "fresh message, photo attached", intent: "other", why: "A capacity notice; nothing is unsafe." },
     { message: 'Photo: "P1 pump room housekeeping area"', facts: "fresh message, photo attached, nobody named", intent: "new_issue_missing_pic", why: "A stated priority on a named area flags a problem; the photo may not make it obvious to an outsider, and does not need to." },
   ],
