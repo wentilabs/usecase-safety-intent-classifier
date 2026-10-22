@@ -53,8 +53,9 @@ test("validation: unknown facts never refute; known ones do", () => {
   assert.strictEqual(r.ok, false);
   assert.match(r.why, /quotedIssue.status/);
   assert.strictEqual(validateIntent("safety.deleted_closure", {}).ok, true, "correction intents are derived, never refused");
-  assert.strictEqual(validateIntent("safety.new_issue", { "message.hasText": true, "message.hasPhoto": false, "earlierPhoto.unrecorded": false }).ok, false, "anyOf: no photo anywhere");
-  assert.strictEqual(validateIntent("safety.new_issue", { "message.hasText": true, "message.hasPhoto": false, "earlierPhoto.unrecorded": true }).ok, true);
+  assert.strictEqual(validateIntent("safety.new_issue", { "message.kind": "text", "message.hasText": true, "message.hasPhoto": false, "earlierPhoto.unrecorded": false }).ok, false, "anyOf: no photo anywhere");
+  assert.strictEqual(validateIntent("safety.new_issue", { "message.kind": "video", "message.hasText": true, "message.hasPhoto": false, "earlierPhoto.unrecorded": false }).ok, true, "a captioned video is the record");
+  assert.strictEqual(validateIntent("safety.new_issue", { "message.kind": "text", "message.hasText": true, "message.hasPhoto": false, "earlierPhoto.unrecorded": true }).ok, true);
   assert.strictEqual(validateIntent("other", { anything: 1 }).ok, true);
   assert.strictEqual(validateIntent("safety.made_up", {}).ok, false);
 });

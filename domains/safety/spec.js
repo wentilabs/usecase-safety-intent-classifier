@@ -37,7 +37,7 @@ const SAFETY_DOMAIN = {
       meaning: "A new safety issue, complete: a description of the condition and a photo of it, and the person responsible is named.",
       signals: [
         "describes an unsafe condition, act, near miss, incident, or a safety observation worth recording",
-        "a photo is available (on this message, or an earlier undescribed photo this message describes)",
+        "a photo or video is available (on this message, or an earlier undescribed photo this message describes)",
         "names or @mentions who should act on it",
       ],
       notWhen: [
@@ -45,14 +45,14 @@ const SAFETY_DOMAIN = {
         "a photo alone with no words",
         "it is about an issue already recorded (that is a closure, recurrence or edit)",
       ],
-      requires: { all: { "message.hasText": true }, anyOf: [{ "message.hasPhoto": true }, { "earlierPhoto.unrecorded": true }] },
+      requires: { all: { "message.hasText": true }, anyOf: [{ "message.hasPhoto": true }, { "message.kind": "video" }, { "earlierPhoto.unrecorded": true }] },
     },
     {
       id: "new_issue_missing_pic",
       meaning: "A new safety issue, complete except that nobody is named as responsible for fixing it.",
       signals: ["everything that makes a new_issue, but no person is named or @mentioned as responsible"],
       notWhen: ["it is missing a photo (that is new_issue_missing_photo)"],
-      requires: { all: { "message.hasText": true }, anyOf: [{ "message.hasPhoto": true }, { "earlierPhoto.unrecorded": true }] },
+      requires: { all: { "message.hasText": true }, anyOf: [{ "message.hasPhoto": true }, { "message.kind": "video" }, { "earlierPhoto.unrecorded": true }] },
     },
     {
       id: "new_issue_missing_photo",
@@ -60,7 +60,8 @@ const SAFETY_DOMAIN = {
       signals: ["describes an unsafe condition in words", "no photo on the message and no earlier undescribed photo"],
       notWhen: [
         "it is chatter, a question or a reminder rather than a report",
-        "something other than a photo was attached (a video, document or voice note) — the sender did attach something",
+        "a video is attached — a captioned video is recorded like a photo",
+        "a document or voice note is attached — the sender did attach something",
       ],
       requires: { all: { "message.hasText": true, "message.hasPhoto": false, "earlierPhoto.unrecorded": false } },
     },
@@ -88,7 +89,7 @@ const SAFETY_DOMAIN = {
         "a toolbox-meeting or briefing ATTENDANCE record, a start card or a sign-off sheet",
         "a water parade (workers drinking water on a schedule) — that is a separate record, not safety"
       ],
-      requires: { all: { "message.hasText": true, "message.hasPhoto": true } },
+      requires: { all: { "message.hasText": true }, anyOf: [{ "message.hasPhoto": true }, { "message.kind": "video" }] },
     },
 
     // ── closing ─────────────────────────────────────────────────────────────
@@ -124,7 +125,7 @@ const SAFETY_DOMAIN = {
     // ── follow-ups ──────────────────────────────────────────────────────────
     {
       id: "recurrence",
-      meaning: "Says a recorded issue has happened again ('same', 'same again', 'this one again').",
+      meaning: "Says a recorded issue has happened again ('same', 'same again', 'this one again'). Rare: choose it only when the words say the same problem is back and nothing else fits.",
       signals: ["replies to a recorded issue (open or closed)", "says it is the same problem, again"],
       notWhen: ["the same KIND of hazard at a different place, with its own description — judge that as a new issue"],
       requires: { all: { "message.isReply": true, "message.hasText": true }, anyOf: [{ "quotedIssue.status": "open" }, { "quotedIssue.status": "closed" }] },
@@ -187,14 +188,12 @@ const SAFETY_DOMAIN = {
   instructions: [
     "Judge a reply by what it SAYS, not by the fact that it is a reply. Replying is just how people talk in a group chat.",
     "A reply about a recorded issue is about that issue — closing it, sending its after-photo, saying it happened again. Only treat it so when the facts say the quoted message is a recorded issue.",
-    "A reply can still carry a NEW issue: when it answers the desk's request for a photo, when it describes an earlier photo that has no description yet, or when it reports a different hazard of its own.",
+    "A reply can still carry a NEW issue: when it answers the desk's request for a photo, when it describes an earlier photo that has no description yet, or when it brings its own photo and words describing a different hazard. A hazard mentioned in passing in a reply, with no photo of its own, is not recorded.",
     "The words decide, not the photo. A hazardous-looking photo with 'good morning' is not a report; a terse '@person FE stand' or 'P1 housekeeping area' under a photo is — the sender is flagging something, even when the photo means little to an outsider.",
     "A promise, an acknowledgement or a question is never a closure. Only words that claim the work is done.",
     "People write fast, in fragments, with typos, Singlish, mixed languages and @mentions. Read for meaning, not grammar.",
-    "If the message is about something else entirely — workforce numbers, scheduling, greetings, other teams' business — it is not a safety intent.",
-    "These look like safety but never are, with or without a photo: a facility's status (carpark full, gate closed, lift out of service); security patrol or gate-status logs; planning and coordination (scheduling, deliveries, meetings, go-aheads); progress updates and shift digests; weather advisories, even urgent stop-work or take-shelter instructions; reminders about already-tracked items, including screenshots of a register, hazard log or tracker; automated alerts (heat, noise, report reminders); chatter; who arrived, left or is on site; toolbox-meeting, briefing or start-card attendance records.",
-    "Requests and directives are judged by what they are about. About logistics or coordination — deliveries, schedules, 'please send manpower' — they are not safety. When the words or the photo show a condition that is unsafe right now — rubble on a walkway, no safe access for a lifting crew, a missing fire extinguisher stand — the request or directive is how the sender reports it.",
-    "A picture of a list — a register, tracker or the desk's own open-issues page — is not a photo of the site. A reply to one is about items already tracked, never a new report.",
+    "A safety issue observes a condition on site that someone must put right, or records safety work done. Messages that schedule, announce, recap, track or log are not — progress digests, weather advisories, facility status, patrol logs, reminders about tracked items, attendance records, who came and went, workforce numbers, greetings and chatter — even with a photo and urgent words.",
+    "A request asks for something to be provided — manpower, a delivery, access, a permit — and stays a request, even when it is about safety; it is not an issue for someone to rectify. A directive to put right something shown wrong is the sender reporting it.",
   ],
 
   examples: [
@@ -212,9 +211,10 @@ const SAFETY_DOMAIN = {
     { message: '"Mohamed Shafiee 6591234567"', facts: "replies to the desk's '👤 Who should this safety issue be assigned to?'", intent: "pic_answer", why: "Names the person responsible." },
     { message: '"will settle by tmr"', facts: "replies to a recorded OPEN issue", intent: "other", why: "A promise is not a fix." },
     { message: 'Photo: "weekly crawler crane boomdown inspection has been completed. Witness by WH WSHS"', facts: "fresh message, photo attached", intent: "good_observation", why: "A completed, witnessed inspection the site keeps on record." },
-    { message: '"Lightning alert CAT 1 now. Stop all lifting, all workers take shelter"', facts: "fresh message, no photo", intent: "other", why: "A weather advisory; the danger is the weather, not a condition on site." },
+    { message: '"Lightning alert CAT 1 now. Stop all lifting, all workers take shelter"', facts: "fresh message, no photo", intent: "other", why: "An advisory about the weather, not a condition on site." },
     { message: '"hang up fire extinguisher"', facts: "replies to a picture the desk itself posted", intent: "other", why: "The desk posts its register pages; this is follow-up on an item already tracked." },
-    { message: '"pls arrange 6 more workers for tmr concreting"', facts: "fresh message, no photo", intent: "other", why: "A coordination request; nothing unsafe is described." },
+    { message: 'Photo: "Here I need a access for lifting team"', facts: "fresh message, photo attached", intent: "other", why: "A request for access to be provided, not something wrong to be rectified." },
+    { message: 'Photo: "@Ah Seng arrange to send out ur hardcore bro"', facts: "fresh message, photo of rubble on a walkway", intent: "new_issue", why: "A directive to clear something that should not be there." },
     { message: 'Photo: "TOL 2 Carpark Full"', facts: "fresh message, photo attached", intent: "other", why: "A capacity notice; nothing is unsafe." },
     { message: 'Photo: "P1 pump room housekeeping area"', facts: "fresh message, photo attached, nobody named", intent: "new_issue_missing_pic", why: "A stated priority on a named area flags a problem; the photo may not make it obvious to an outsider, and does not need to." },
   ],
