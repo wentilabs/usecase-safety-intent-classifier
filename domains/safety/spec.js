@@ -171,7 +171,7 @@ const SAFETY_DOMAIN = {
     "Judge a reply by what it SAYS, not by the fact that it is a reply. Replying is just how people talk in a group chat.",
     "A reply about a recorded issue is about that issue — closing it, sending its after-photo, saying it happened again. Only treat it so when the facts say the quoted message is a recorded issue.",
     "A reply can still carry a NEW issue: when it answers the desk's request for a photo, when it describes an earlier photo that has no description yet, or when it reports a different hazard of its own.",
-    "The words decide, not the photo. A hazardous-looking photo with 'good morning' is not a report; a terse '@person FE stand' under a photo of a fire extinguisher on the floor is.",
+    "The words decide, not the photo. A hazardous-looking photo with 'good morning' is not a report; a terse '@person FE stand' or 'P1 housekeeping area' under a photo is — the sender is flagging something, even when the photo means little to an outsider.",
     "A promise, an acknowledgement or a question is never a closure. Only words that claim the work is done.",
     "Deletions and edits are decided by what the ORIGINAL message did, given in the facts. A deletion of a message that did nothing is not a safety intent.",
     "People write fast, in fragments, with typos, Singlish, mixed languages and @mentions. Read for meaning, not grammar.",
@@ -195,6 +195,7 @@ const SAFETY_DOMAIN = {
     { message: "(deleted)", facts: "deletion; the deleted message closed issue #7", intent: "deleted_closure", why: "Withdrawing the closure reopens the issue." },
     { message: '"will settle by tmr"', facts: "replies to a recorded OPEN issue", intent: "other", why: "A promise is not a fix." },
     { message: 'Photo: "TOL 2 Carpark Full"', facts: "fresh message, photo attached", intent: "other", why: "A capacity notice; nothing is unsafe." },
+    { message: 'Photo: "P1 pump room housekeeping area"', facts: "fresh message, photo attached, nobody named", intent: "new_issue_missing_pic", why: "A stated priority on a named area flags a problem; the photo may not make it obvious to an outsider, and does not need to." },
   ],
 
   /** What the classifier understands. All optional; anything absent is unknown. */
