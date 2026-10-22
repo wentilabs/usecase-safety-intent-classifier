@@ -126,3 +126,13 @@ test("a refused answer gets one reconsideration, told the contradicted fact", as
   assert.strictEqual(r.intent, "safety.new_issue");
   assert.strictEqual(r.reconsidered.intent, "safety.closure");
 });
+
+test("each earlier line says how long before the message it was sent", () => {
+  const conv = buildConversation({
+    message: { body: "done", timestamp: 1792661336 },
+    recent: [{ sender: "A", body: "old", timestamp: 1792661336 - 3 * 3600 - 12 * 60 }, { sender: "B", body: "new", timestamp: 1792661336 - 120 }],
+  });
+  const text = renderConversation(conv);
+  assert.match(text, /3 h 12 min earlier\] A: "old"/);
+  assert.match(text, /2 min earlier\] B: "new"/);
+});

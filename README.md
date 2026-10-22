@@ -65,6 +65,19 @@ needs:
 
 Full definitions: `domains/safety/spec.js`, or `GET /domains/safety`.
 
+## Configuration
+
+Three environment variables, nothing else:
+
+| variable | used for |
+|---|---|
+| `OPENAI_API_KEY` | the one model call |
+| `SUPABASE_URL` | reading the chat archive (`whatsapp_listener`) and the main photo |
+| `SUPABASE_SECRET_KEY` | the same, read-only |
+
+Which listener's copy counts as "ours" comes from the payload's own `clientIdentifier`.
+The model is `gpt-6-luna` unless the request names another (`model`).
+
 ## Run
 
     npm test
