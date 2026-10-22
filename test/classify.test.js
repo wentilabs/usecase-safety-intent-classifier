@@ -25,7 +25,7 @@ const reminderReply = {
 
 test("the model reads the conversation slice: two earlier text messages, the quoted one, the message", async () => {
   const m = fakeModel({ intent: "safety.closure", reason: "fixed", confidence: 90 });
-  const r = await classify(reminderReply, m);
+  const r = await classify({ ...reminderReply, retrieve: false }, m);
   assert.strictEqual(r.intent, "safety.closure");
   const user = m.seen[0].input[1].content;
   assert.match(user, /toolbox at 7\.30/);
@@ -37,7 +37,7 @@ test("the model reads the conversation slice: two earlier text messages, the quo
 
 test("the model can only pick a composed intent, and is forced to answer", async () => {
   const m = fakeModel({ intent: "other", reason: "x", confidence: 50 });
-  await classify(reminderReply, m);
+  await classify({ ...reminderReply, retrieve: false }, m);
   const req = m.seen[0];
   assert.deepStrictEqual(req.tool_choice, { type: "function", name: "classify" });
   const allowed = req.tools[0].parameters.properties.intent.enum;
@@ -48,7 +48,7 @@ test("the model can only pick a composed intent, and is forced to answer", async
 
 test("an intent that contradicts a supplied fact becomes other, with the reason", async () => {
   const m = fakeModel({ intent: "safety.closure", reason: "x", confidence: 80 });
-  const r = await classify({ ...reminderReply, facts: { "quotedIssue.status": "not_an_issue" } }, m);
+  const r = await classify({ ...reminderReply, retrieve: false, facts: { "quotedIssue.status": "not_an_issue" } }, m);
   assert.strictEqual(r.intent, "other");
   assert.strictEqual(r.refused.intent, "safety.closure");
   assert.match(r.refused.why, /quotedIssue.status/);
@@ -68,5 +68,5 @@ test("the desk's own shapes are trusted only when the desk sent them", () => {
 
 test("a failed model call is an error, not a guess", async () => {
   const fetchImpl = async () => ({ ok: false, status: 429, text: async () => "rate limited" });
-  await assert.rejects(() => classify(reminderReply, { fetchImpl, apiKey: "t" }), /429/);
+  await assert.rejects(() => classify({ ...reminderReply, retrieve: false }, { fetchImpl, apiKey: "t" }), /429/);
 });
