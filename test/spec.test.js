@@ -20,6 +20,16 @@ test("intent ids are unique, and no domain declares its own `other`", () => {
   assert.ok(!ids.includes("other"));
 });
 
+test("every correction maps a live intent to a declared correction intent", () => {
+  const live = new Set(safety.intents.map((i) => i.id));
+  for (const kind of ["deletion", "edit"]) {
+    for (const [from, to] of Object.entries(safety.corrections[kind])) {
+      assert.ok(live.has(from), `${kind}: ${from} is not a live intent`);
+      assert.ok(safety.corrections.intents[to], `${kind}: ${to} is not declared`);
+    }
+  }
+});
+
 test("every example names a real intent, and every `requires` key is a declared feature", () => {
   const ids = new Set([...safety.intents.map((i) => i.id), "other"]);
   for (const e of safety.examples) assert.ok(ids.has(e.intent), `example uses unknown intent ${e.intent}`);
@@ -42,8 +52,7 @@ test("validation: unknown facts never refute; known ones do", () => {
   const r = validateIntent("safety.closure", { "message.isReply": true, "message.hasPhoto": true, "message.hasText": true, "quotedIssue.status": "not_an_issue" });
   assert.strictEqual(r.ok, false);
   assert.match(r.why, /quotedIssue.status/);
-  assert.strictEqual(validateIntent("safety.deleted_closure", { "message.isDeletion": true, "original.effect": "closed_issue" }).ok, true);
-  assert.strictEqual(validateIntent("safety.deleted_closure", { "message.isDeletion": true, "original.effect": "created_issue" }).ok, false);
+  assert.strictEqual(validateIntent("safety.deleted_closure", {}).ok, true, "correction intents are derived, never refused");
   assert.strictEqual(validateIntent("safety.new_issue", { "message.hasText": true, "message.hasPhoto": false, "earlierPhoto.unrecorded": false }).ok, false, "anyOf: no photo anywhere");
   assert.strictEqual(validateIntent("safety.new_issue", { "message.hasText": true, "message.hasPhoto": false, "earlierPhoto.unrecorded": true }).ok, true);
   assert.strictEqual(validateIntent("other", { anything: 1 }).ok, true);
@@ -64,6 +73,7 @@ test("HTTP: domains, one domain, composed spec, errors", async () => {
   assert.strictEqual((await handle("GET", "/domains/nope")).status, 404);
   const spec = await handle("GET", "/spec", { domains: "safety" });
   assert.strictEqual(spec.status, 200);
-  assert.ok(spec.body.intents.some((i) => i.id === "safety.deleted_closure"));
+  assert.ok(!spec.body.intents.some((i) => i.id === "safety.deleted_closure"), "corrections are not chosen by the model");
+  assert.strictEqual((await handle("GET", "/domains/safety")).body.corrections.deletion.closure, "deleted_closure");
   assert.strictEqual((await handle("GET", "/spec", { domains: "safety,nope" })).status, 400);
 });

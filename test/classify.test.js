@@ -41,7 +41,8 @@ test("the model can only pick a composed intent, and is forced to answer", async
   const req = m.seen[0];
   assert.deepStrictEqual(req.tool_choice, { type: "function", name: "classify" });
   const allowed = req.tools[0].parameters.properties.intent.enum;
-  assert.ok(allowed.includes("safety.deleted_closure") && allowed.includes("other"));
+  assert.ok(allowed.includes("safety.closure") && allowed.includes("other"));
+  assert.ok(!allowed.some((x) => /deleted_|edited_/.test(x)), "correction intents are never offered to the model");
   assert.strictEqual(allowed.filter((x) => x === "other").length, 1);
   assert.ok(!("temperature" in req), "reasoning models are not sent temperature");
 });
@@ -135,4 +136,54 @@ test("each earlier line says how long before the message it was sent", () => {
   const text = renderConversation(conv);
   assert.match(text, /3 h 12 min earlier\] A: "old"/);
   assert.match(text, /2 min earlier\] B: "new"/);
+});
+
+/** A fake model that answers per call from a list. */
+function scriptedModel(answers) {
+  const seen = [];
+  const fetchImpl = async (url, init) => {
+    seen.push(JSON.parse(init.body));
+    const a = answers[Math.min(seen.length - 1, answers.length - 1)];
+    return { ok: true, json: async () => ({ output: [{ type: "function_call", name: "classify", arguments: JSON.stringify(a) }] }) };
+  };
+  return { fetchImpl, seen, apiKey: "t" };
+}
+
+test("a deletion classifies the ORIGINAL as live, then maps it", async () => {
+  const m = scriptedModel([{ intent: "safety.closure", reason: "it closed #7", confidence: 90 }]);
+  const r = await classify({
+    domains: ["safety"], retrieve: false,
+    message: { isDeleted: true, parentMsgKey: "x" },
+    original: { sender: "Muthu", type: "image", body: "done", photoDataUrl: "data:image/png;base64,AA", quotedMessageId: "Q" },
+  }, m);
+  assert.strictEqual(r.intent, "safety.deleted_closure");
+  assert.strictEqual(r.original.intent, "safety.closure");
+  const user = m.seen[0].input[1].content[0].text;
+  assert.match(user, /Muthu: "done"/, "the model read the original, not a deletion placeholder");
+  assert.doesNotMatch(user, /deleted this message/);
+});
+
+test("deleting a message that recorded nothing is other", async () => {
+  const m = scriptedModel([{ intent: "safety.new_issue_missing_photo", reason: "asked for photo", confidence: 90 }]);
+  const r = await classify({ domains: ["safety"], retrieve: false, message: { isDeleted: true }, original: { body: "open edge L5" } }, m);
+  assert.strictEqual(r.intent, "other");
+  assert.match(r.reason, /recorded nothing/);
+});
+
+test("a deletion whose original cannot be found is other, said plainly", async () => {
+  const r = await classify({ domains: ["safety"], retrieve: false, message: { isDeleted: true } }, scriptedModel([{}]));
+  assert.strictEqual(r.intent, "other");
+  assert.strictEqual(r.original, null);
+});
+
+test("an edit of a recorded issue maps; an edit of something that recorded nothing is read as new", async () => {
+  const m1 = scriptedModel([{ intent: "safety.new_issue", reason: "r", confidence: 90 }]);
+  const r1 = await classify({ domains: ["safety"], retrieve: false, message: { isEdited: true, body: "open edge L5, @Ah Kow", previousBody: "open edge L4, @Ah Kow", type: "image", photoDataUrl: "data:image/png;base64,AA" } }, m1);
+  assert.strictEqual(r1.intent, "safety.edited_new_issue");
+  assert.match(m1.seen[0].input[1].content[0].text, /open edge L4/, "first pass reads the text BEFORE the edit");
+
+  const m2 = scriptedModel([{ intent: "other", reason: "chatter", confidence: 90 }, { intent: "safety.new_issue_missing_photo", reason: "now a report", confidence: 80 }]);
+  const r2 = await classify({ domains: ["safety"], retrieve: false, message: { isEdited: true, body: "open edge L5 no barricade", previousBody: "ok" } }, m2);
+  assert.strictEqual(r2.intent, "safety.new_issue_missing_photo");
+  assert.strictEqual(m2.seen.length, 2, "original first, then the edited text as new");
 });

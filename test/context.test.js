@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert");
-const { fillContext, sentByUs } = require("../lib/context");
+const { fillContext, fetchDeleted, sentByUs } = require("../lib/context");
 
 /** A fake archive: answers each REST read from a list of rows, by the filters it was given. */
 function fakeArchive(rows) {
@@ -57,12 +57,11 @@ test("what the caller sent wins; nothing is read for it", async () => {
   assert.strictEqual(reads.length, 0);
 });
 
-test("an edit's original comes from previousBody; a deletion's from the row it points at", async () => {
+test("a deletion's original is the row its parentMsgKey points at", async () => {
   const { deps } = fakeArchive(rows);
-  const edit = await fillContext({ message: { from: G, body: "new text", isEdited: true, previousBody: "old text", timestamp: 130 }, recent: [] }, deps);
-  assert.strictEqual(edit.request.facts["original.text"], "old text");
-  const del = await fillContext({ message: { from: G, isDeleted: true, parentMsgKey: "false_d0", timestamp: 130 }, recent: [] }, deps);
-  assert.strictEqual(del.request.facts["original.text"], "open edge at L5 no barricade");
+  const row = await fetchDeleted({ from: G, isDeleted: true, parentMsgKey: "false_d0", clientIdentifier: "C1" }, deps);
+  assert.strictEqual(row.body, "open edge at L5 no barricade");
+  assert.strictEqual(row.timestamp, 80, "its OWN timestamp — so its own earlier messages are read");
 });
 
 test("without archive credentials nothing is read, and nothing breaks", async () => {

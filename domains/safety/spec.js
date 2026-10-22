@@ -45,14 +45,14 @@ const SAFETY_DOMAIN = {
         "a photo alone with no words",
         "it is about an issue already recorded (that is a closure, recurrence or edit)",
       ],
-      requires: { all: { "message.hasText": true, "message.isDeletion": false }, anyOf: [{ "message.hasPhoto": true }, { "earlierPhoto.unrecorded": true }] },
+      requires: { all: { "message.hasText": true }, anyOf: [{ "message.hasPhoto": true }, { "earlierPhoto.unrecorded": true }] },
     },
     {
       id: "new_issue_missing_pic",
       meaning: "A new safety issue, complete except that nobody is named as responsible for fixing it.",
       signals: ["everything that makes a new_issue, but no person is named or @mentioned as responsible"],
       notWhen: ["it is missing a photo (that is new_issue_missing_photo)"],
-      requires: { all: { "message.hasText": true, "message.isDeletion": false }, anyOf: [{ "message.hasPhoto": true }, { "earlierPhoto.unrecorded": true }] },
+      requires: { all: { "message.hasText": true }, anyOf: [{ "message.hasPhoto": true }, { "earlierPhoto.unrecorded": true }] },
     },
     {
       id: "new_issue_missing_photo",
@@ -62,14 +62,14 @@ const SAFETY_DOMAIN = {
         "it is chatter, a question or a reminder rather than a report",
         "something other than a photo was attached (a video, document or voice note) — the sender did attach something",
       ],
-      requires: { all: { "message.hasText": true, "message.hasPhoto": false, "message.isDeletion": false, "earlierPhoto.unrecorded": false } },
+      requires: { all: { "message.hasText": true, "message.hasPhoto": false, "earlierPhoto.unrecorded": false } },
     },
     {
       id: "new_issue_missing_severity",
       meaning: "A new safety issue on a project that requires every report to state a severity (P1, P2 or P3), and none was stated.",
       signals: ["a new issue in every other respect", "this project requires a stated severity", "no P1/P2/P3 is stated"],
       notWhen: ["the project does not require a severity"],
-      requires: { all: { "project.requiresSeverity": true, "message.statedSeverity": null, "message.hasText": true, "message.isDeletion": false } },
+      requires: { all: { "project.requiresSeverity": true, "message.statedSeverity": null, "message.hasText": true } },
       // Configuration, not meaning: only offered when the caller says the project requires a severity.
       offeredOnlyWhen: { "project.requiresSeverity": true },
     },
@@ -120,52 +120,48 @@ const SAFETY_DOMAIN = {
       requires: { all: { "message.isReply": true, "quoted.systemMessage": "pic_question" } },
     },
 
-    // ── corrections: edits ──────────────────────────────────────────────────
-    {
-      id: "edited_new_issue",
-      meaning: "Edits a message that created a recorded issue — the record should follow the corrected text.",
-      signals: ["this message is an edit", "the original message created an issue"],
-      notWhen: ["the original created nothing — then judge the edited text as if it were new"],
-      requires: { all: { "message.isEdit": true, "original.effect": "created_issue" } },
-    },
-    {
-      id: "edited_closure",
-      meaning: "Edits a message that closed an issue.",
-      signals: ["this message is an edit", "the original message closed an issue"],
-      notWhen: [],
-      requires: { all: { "message.isEdit": true, "original.effect": "closed_issue" } },
-    },
 
-    // ── corrections: deletions — each says what the deleted message had done ──
-    {
-      id: "deleted_new_issue",
-      meaning: "Deletes a message that created a recorded issue (including a description sent for an earlier photo, or a 'same' copy). The issue it created should be undone.",
-      signals: ["this message is a deletion", "the deleted message created an issue"],
-      notWhen: [],
-      requires: { all: { "message.isDeletion": true, "original.effect": "created_issue" } },
-    },
-    {
-      id: "deleted_closure",
-      meaning: "Deletes a message that closed an issue. The closure it made should be undone.",
-      signals: ["this message is a deletion", "the deleted message closed an issue"],
-      notWhen: [],
-      requires: { all: { "message.isDeletion": true, "original.effect": "closed_issue" } },
-    },
-    {
-      id: "deleted_after_photo",
-      meaning: "Deletes a message that added an after-photo to an already-closed issue. That photo should be undone.",
-      signals: ["this message is a deletion", "the deleted message added a late after-photo"],
-      notWhen: [],
-      requires: { all: { "message.isDeletion": true, "original.effect": "added_after_photo" } },
-    },
-    {
-      id: "deleted_pic_answer",
-      meaning: "Deletes a message that named the person responsible for an issue. That assignment should be undone.",
-      signals: ["this message is a deletion", "the deleted message answered the person-in-charge question"],
-      notWhen: [],
-      requires: { all: { "message.isDeletion": true, "original.effect": "answered_pic" } },
-    },
   ],
+
+  /**
+   * CORRECTIONS — edits and deletions, decided in two passes, never by the model directly.
+   *
+   * A deletion undoes whatever the original message meant; an edit corrects it. So the
+   * ORIGINAL is rebuilt as it was when sent (its own text, photo, reply and earlier
+   * messages) and classified like any live message. Its intent is then mapped here.
+   *
+   * Deletion: an original that changed nothing (it only prompted the sender, or was not
+   * a safety intent) maps to "other".
+   * Edit: an original that recorded something maps to an edit intent; otherwise the
+   * edited text is classified as a new message, because nothing was recorded to correct.
+   *
+   * ⚠️ This says what the original was MEANT to do, not proof that it was done (a closure
+   * the close handler rejected still classifies as a closure). Whoever acts checks.
+   */
+  corrections: {
+    deletion: {
+      new_issue: "deleted_new_issue",
+      new_issue_missing_pic: "deleted_new_issue",
+      recurrence: "deleted_new_issue",
+      closure: "deleted_closure",
+      late_after_photo: "deleted_after_photo",
+      pic_answer: "deleted_pic_answer",
+    },
+    edit: {
+      new_issue: "edited_new_issue",
+      new_issue_missing_pic: "edited_new_issue",
+      recurrence: "edited_new_issue",
+      closure: "edited_closure",
+    },
+    intents: {
+      deleted_new_issue: "Deletes a message that created an issue (including a 'same' copy). Undo the issue.",
+      deleted_closure: "Deletes a message that closed an issue. Undo the closure.",
+      deleted_after_photo: "Deletes a message that added an after-photo to a closed issue. Undo the photo.",
+      deleted_pic_answer: "Deletes a message that named the person responsible. Undo the assignment.",
+      edited_new_issue: "Edits a message that created an issue. The record follows the corrected text.",
+      edited_closure: "Edits a message that closed an issue.",
+    },
+  },
 
   instructions: [
     "Judge a reply by what it SAYS, not by the fact that it is a reply. Replying is just how people talk in a group chat.",
@@ -173,7 +169,6 @@ const SAFETY_DOMAIN = {
     "A reply can still carry a NEW issue: when it answers the desk's request for a photo, when it describes an earlier photo that has no description yet, or when it reports a different hazard of its own.",
     "The words decide, not the photo. A hazardous-looking photo with 'good morning' is not a report; a terse '@person FE stand' or 'P1 housekeeping area' under a photo is — the sender is flagging something, even when the photo means little to an outsider.",
     "A promise, an acknowledgement or a question is never a closure. Only words that claim the work is done.",
-    "Deletions and edits are decided by what the ORIGINAL message did, given in the facts. A deletion of a message that did nothing is not a safety intent.",
     "People write fast, in fragments, with typos, Singlish, mixed languages and @mentions. Read for meaning, not grammar.",
     "If the message is about something else entirely — workforce numbers, scheduling, greetings, other teams' business — it is not a safety intent.",
   ],
@@ -191,8 +186,6 @@ const SAFETY_DOMAIN = {
     { message: 'Photo: "settled"', facts: "replies to a recorded CLOSED issue", intent: "late_after_photo", why: "Evidence for an issue that was closed without it." },
     { message: '"same again"', facts: "replies to a recorded CLOSED issue", intent: "recurrence", why: "The same problem has come back." },
     { message: '"Mohamed Shafiee 6591234567"', facts: "replies to the desk's '👤 Who should this safety issue be assigned to?'", intent: "pic_answer", why: "Names the person responsible." },
-    { message: "(deleted)", facts: "deletion; the deleted message created issue #12", intent: "deleted_new_issue", why: "Withdrawing the report undoes the issue." },
-    { message: "(deleted)", facts: "deletion; the deleted message closed issue #7", intent: "deleted_closure", why: "Withdrawing the closure reopens the issue." },
     { message: '"will settle by tmr"', facts: "replies to a recorded OPEN issue", intent: "other", why: "A promise is not a fix." },
     { message: 'Photo: "TOL 2 Carpark Full"', facts: "fresh message, photo attached", intent: "other", why: "A capacity notice; nothing is unsafe." },
     { message: 'Photo: "P1 pump room housekeeping area"', facts: "fresh message, photo attached, nobody named", intent: "new_issue_missing_pic", why: "A stated priority on a named area flags a problem; the photo may not make it obvious to an outsider, and does not need to." },
@@ -205,8 +198,6 @@ const SAFETY_DOMAIN = {
     "message.hasText": "true when there is any text after trimming",
     "message.hasPhoto": "a readable photo is attached to this message",
     "message.isReply": "this message quotes an earlier one",
-    "message.isEdit": "this message is an edit of an earlier one",
-    "message.isDeletion": "this message is a deletion of an earlier one",
     "message.statedSeverity": "P1 | P2 | P3 when the sender wrote one, else null",
     "message.mentions": "number of @mentions",
     "quoted.text": "the quoted message's text",
@@ -217,8 +208,6 @@ const SAFETY_DOMAIN = {
     "quoted.media": "photo | video | document | voice note | sticker | none — what the quoted message carried",
     "quotedIssue.status": "open | closed | not_an_issue — the register's answer about the quoted message",
     "earlierPhoto.unrecorded": "this message describes an earlier photo that had no description and was never recorded",
-    "original.effect": "for an edit or deletion: created_issue | closed_issue | added_after_photo | answered_pic | none",
-    "original.text": "for an edit or deletion: the original message's text",
     "project.requiresSeverity": "this project requires every new report to state P1/P2/P3",
   },
 };
