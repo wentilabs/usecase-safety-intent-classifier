@@ -1,0 +1,12 @@
+{
+  "name": "usecase-safety-intent-classifier",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Safety intent classification as a service: payloads + features in, one intent out. Composable with other intent domains.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" }
+}

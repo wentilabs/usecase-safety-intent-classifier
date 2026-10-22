@@ -1,0 +1,6 @@
+node_modules/
+.env
+.env.*
+.DS_Store
+# Evaluation runs can contain real site messages; they stay on the machine that ran them.
+eval-runs/
