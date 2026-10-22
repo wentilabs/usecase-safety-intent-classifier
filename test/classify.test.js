@@ -187,3 +187,10 @@ test("an edit of a recorded issue maps; an edit of something that recorded nothi
   assert.strictEqual(r2.intent, "safety.new_issue_missing_photo");
   assert.strictEqual(m2.seen.length, 2, "original first, then the edited text as new");
 });
+
+test("a picture the desk posted is described as its own page, not a site photo", () => {
+  const desk = renderConversation(buildConversation({ message: { body: "hang up fire extinguisher" }, quoted: { messageIdSerialized: "true_1", type: "image" } }));
+  const person = renderConversation(buildConversation({ message: { body: "hang up fire extinguisher" }, quoted: { messageIdSerialized: "false_1", type: "image" } }));
+  assert.match(desk, /picture the desk itself posted/);
+  assert.doesNotMatch(person, /picture the desk itself posted/);
+});
