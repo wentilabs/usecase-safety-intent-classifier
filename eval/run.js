@@ -37,6 +37,10 @@ const ACCEPTS = {
   ask_for_photo: ["new_issue_missing_photo"],
   close_issue: ["closure", "closure_missing_photo", "closure_missing_description", "late_after_photo"],
   copy_issue: ["recurrence"],
+  good_observation: ["good_observation"],
+  answer_pic: ["pic_answer"],
+  undo_message: ["deleted_new_issue", "deleted_good_observation", "deleted_closure", "deleted_after_photo", "deleted_pic_answer"],
+  correct_message: ["edited_new_issue", "edited_good_observation", "edited_closure"],
   no_action: ["other"],
   log_workforce: ["other"], // workforce is not a safety intent here; scored separately
 };
