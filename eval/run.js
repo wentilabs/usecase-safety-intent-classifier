@@ -60,6 +60,17 @@ function standIn(shows) {
   }
 }
 
+/** A real photo saved next to a set built from the archive (`photo.file`, relative to the set). */
+function realPhoto(file) {
+  try {
+    const p = path.join(path.dirname(casesPath), file);
+    const type = /\.png$/i.test(p) ? "png" : /\.webp$/i.test(p) ? "webp" : "jpeg";
+    return `data:image/${type};base64,${fs.readFileSync(p).toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
 /** A scenario as a classify request: the message, what it quotes, and the facts it states. */
 function toRequest(c) {
   const m = c.message || {};
@@ -74,7 +85,8 @@ function toRequest(c) {
     message: {
       messageId: c.id, sender: "Site staff", type: m.type || "chat", body: m.body || "",
       ...(isReply ? { quotedMessageId: "Q" } : {}),
-      ...(c.photo ? { photoDataUrl: standIn(c.photo.shows) } : {}),
+      ...(c.photo ? { photoDataUrl: c.photo.file ? realPhoto(c.photo.file) : standIn(c.photo.shows) } : {}),
+      ...(c.payload ? { timestamp: c.payload.timestamp, from: c.payload.from || c.payload.chatId, clientIdentifier: c.payload.clientIdentifier } : {}),
     },
     ...(isReply
       ? { quoted: c.deferredAnchor
