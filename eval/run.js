@@ -33,14 +33,15 @@ if (!casesPath) { console.error("usage: eval/run.js <decision-cases.json> [--tod
 
 /** Which of this service's intents count as matching each base-template label. */
 const ACCEPTS = {
-  create_issue: ["new_issue", "new_issue_missing_pic", "good_observation"], // good observations were filed as issues
+  create_issue: ["new_issue", "new_issue_missing_pic"],
   ask_for_photo: ["new_issue_missing_photo"],
   close_issue: ["closure", "closure_missing_photo", "closure_missing_description", "late_after_photo"],
   copy_issue: ["recurrence"],
-  good_observation: ["good_observation"],
+  // A good observation is not a safety intent: the classifier should say `other`.
+  good_observation: ["other"],
   answer_pic: ["pic_answer"],
-  undo_message: ["deleted_new_issue", "deleted_good_observation", "deleted_closure", "deleted_after_photo", "deleted_pic_answer"],
-  correct_message: ["edited_new_issue", "edited_good_observation", "edited_closure"],
+  undo_message: ["deleted_new_issue", "deleted_closure", "deleted_after_photo", "deleted_pic_answer"],
+  correct_message: ["edited_new_issue", "edited_closure"],
   no_action: ["other"],
   log_workforce: ["other"], // workforce is not a safety intent here; scored separately
 };
@@ -121,7 +122,7 @@ function toRequest(c) {
       }
       const t = today[c.id];
       // A real-archive set is labelled with the intents themselves; the older set with actions.
-      const ok = (intent) => (c.expected ? intent === c.expected || (ACCEPTS[c.expected] || []).includes(intent) : null);
+      const ok = (intent) => (c.expected ? (ACCEPTS[c.expected] ? ACCEPTS[c.expected].includes(intent) : intent === c.expected) : null);
       rows.push({ id: c.id, source: c.source, shape: c.shape, expected: c.expected || null, vetted: Boolean(c.vetting), answers, newOk: c.expected ? answers.every((a) => ok(a.intent)) : null, stable: new Set(answers.map((a) => a.intent)).size === 1, today: t ? t.today : null, todayOk: t && c.expected ? t.today === c.expected : null, text: (m => `${m.type === "image" ? "📷 " : ""}${m.body || ""}`)(c.message || {}) });
       process.stderr.write(".");
     }));

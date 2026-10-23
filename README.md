@@ -58,15 +58,14 @@ None left gives `other`; one left, its answer stands. Each first answer is retur
 | `new_issue_missing_pic` | complete except nobody is named as responsible |
 | `new_issue_missing_photo` | clearly a report, but no photo |
 | `new_issue_missing_severity` | the project requires P1–P3 and none was stated |
-| `good_observation` | a safety activity done or a control in place, kept on record (inspection witnessed, housekeeping done, fire drill) |
 | `closure` | a recorded open issue reported fixed, with photo and words |
 | `closure_missing_photo` | claims fixed, no after-photo |
 | `closure_missing_description` | after-photo, no words |
 | `late_after_photo` | after-photo for an already-closed issue |
 | `recurrence` | "same" — a recorded issue has happened again |
 | `pic_answer` | answers the desk's "who is responsible?" |
-| `edited_new_issue` / `edited_good_observation` / `edited_closure` | edits a message that created an issue / recorded a good observation / closed an issue |
-| `deleted_new_issue` / `deleted_good_observation` / `deleted_closure` / `deleted_after_photo` / `deleted_pic_answer` | deletes a message that did that — so the caller knows what to undo |
+| `edited_new_issue` / `edited_closure` | edits a message that created / closed an issue |
+| `deleted_new_issue` / `deleted_closure` / `deleted_after_photo` / `deleted_pic_answer` | deletes a message that did that — so the caller knows what to undo |
 
 Full definitions: `domains/safety/spec.js`, or `GET /domains/safety`.
 
