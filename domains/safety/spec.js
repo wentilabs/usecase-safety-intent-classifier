@@ -49,19 +49,20 @@ const SAFETY_DOMAIN = {
     },
     {
       id: "new_issue_missing_pic",
-      meaning: "A new safety issue, complete except that nobody is named as responsible for fixing it.",
+      meaning: "A new safety issue, complete except that nobody is named as responsible for fixing it. The photo may be the one it replies to.",
       signals: ["everything that makes a new_issue, but no person is named or @mentioned as responsible"],
       notWhen: ["it is missing a photo (that is new_issue_missing_photo)"],
       requires: { all: { "message.hasText": true }, anyOf: [{ "message.hasPhoto": true }, { "message.kind": "video" }, { "earlierPhoto.unrecorded": true }] },
     },
     {
       id: "new_issue_missing_photo",
-      meaning: "Clearly a new safety issue being reported, but no photo is available to record it with.",
-      signals: ["describes an unsafe condition in words", "no photo on the message and no earlier undescribed photo"],
+      meaning: "Clearly a new safety issue being reported, but no photo is available anywhere to record it with — none on the message, and none in the message it replies to.",
+      signals: ["describes an unsafe condition in words", "no photo on the message, and it does not reply to a photo that shows the problem"],
       notWhen: [
         "it is chatter, a question or a reminder rather than a report",
         "a video is attached — a captioned video is recorded like a photo",
         "a document or voice note is attached — the sender did attach something",
+        "it replies to a photo that shows the problem — that photo is the record's photo",
       ],
       requires: { all: { "message.hasText": true, "message.hasPhoto": false, "earlierPhoto.unrecorded": false } },
     },
@@ -171,7 +172,7 @@ const SAFETY_DOMAIN = {
   instructions: [
     "Judge a reply by what it SAYS, not by the fact that it is a reply. Replying is just how people talk in a group chat.",
     "A reply about a recorded issue is about that issue — closing it, sending its after-photo, saying it happened again. Only treat it so when the facts say the quoted message is a recorded issue.",
-    "A reply can still carry a NEW issue: when it answers the desk's request for a photo, when it describes an earlier photo that has no description yet, or when it brings its own photo and words describing a different hazard.",
+    "A reply can still carry a NEW issue: when it answers the desk's request for a photo; when it reports a problem shown in the photo it replies to, and that photo was not already reported (no caption, or a caption that reported nothing, like 'housekeeping photos') — that photo is then the issue's photo; or when it brings its own photo and words describing a different hazard. A reply that only presses on a photo already reported as a problem is not a new issue.",
     "The words decide, not the photo. A real report names the safety situation or the remedy in its words. Length and format never decide: two words can be a report ('@person FE stand', 'P1 housekeeping area'), and a filled report template is not one when its description names nothing. A place, a route or a label alone ('from Gate-1', 'level 3 corridor') is not a report, however the photo looks, even with arrows or markings drawn on it.",
     "A short reply is read with the conversation around it. The same fragment can caption an earlier photo — naming what is missing or what to do — or answer a question someone just asked. Let the earlier messages decide which.",
     "A promise, an acknowledgement or a question is never a closure. Only words that claim the work is done.",
