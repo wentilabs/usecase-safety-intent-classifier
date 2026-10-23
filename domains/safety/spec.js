@@ -77,7 +77,7 @@ const SAFETY_DOMAIN = {
 
     {
       id: "good_observation",
-      meaning: "Records a safety activity done or a control in place, deliberately kept on record: housekeeping done, a barricade installed, an inspection completed and witnessed, a fire drill held, someone seen working safely.",
+      meaning: "Records safety work carried out or a control in place, which the site deliberately keeps on record — whatever form it takes: housekeeping done, a barricade installed, an inspection witnessed, a drill or safety walk held, PPE issued, a health check done, someone seen working safely.",
       signals: [
         "words say a safety activity was done, is underway, or a control is in place",
         "a photo of it",
