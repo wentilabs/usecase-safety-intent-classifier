@@ -101,3 +101,15 @@ test("the desk's own messages are part of the earlier context", async () => {
   assert.strictEqual(request.recent[0].fromThisSystem, true);
   assert.match(request.recent[0].body, /Who should this safety issue be assigned to/);
 });
+
+test("a photo's bytes stored as text are not one of the earlier text messages", async () => {
+  const jpeg = "/9j/4AAQSkZJRgABAQAAAQABAAD" + "A".repeat(400);
+  const rows = [
+    { messageId: "3", body: jpeg, timestamp: 3, type: "image" },
+    { messageId: "2", body: "Breathalyser test all clear", timestamp: 2 },
+    { messageId: "1", body: "Morning all", timestamp: 1 },
+  ];
+  const fetchImpl = async () => ({ ok: true, json: async () => rows });
+  const { request } = await fillContext({ message: { from: "g", messageId: "9", timestamp: 9 } }, { url: "u", key: "k", fetchImpl });
+  assert.deepStrictEqual(request.recent.map((r) => r.body), ["Morning all", "Breathalyser test all clear"]);
+});
