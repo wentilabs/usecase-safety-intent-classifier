@@ -21,8 +21,13 @@ const DEFAULT_SYSTEM_MESSAGES = Object.freeze({
   issueReminder: /^⚠️\s*Issue\s*#(\d+)(?:\s*\[([^\]]*)\])?\s+still open\s*$/,
   /** The create gate's request for a photo. Exact text. */
   photoRequest: "Please reply to or attach an image with this message to create a safety issue.",
-  /** Every person-in-charge question starts with this. */
+  /**
+   * The person-in-charge question, in both wordings the desk uses: the link flow's
+   * "👤 Who should this safety issue be assigned to?" and the live
+   * "⚠️ Who will be in charge of this safety issue?" (pic/parsers.js).
+   */
   picQuestionPrefix: "👤",
+  picQuestionText: "Who will be in charge of this safety issue?",
 });
 
 /**
@@ -37,7 +42,7 @@ function recogniseSystemMessage(text, formats = DEFAULT_SYSTEM_MESSAGES) {
   const reminder = formats.issueReminder.exec(firstLine);
   if (reminder) return { kind: "issue_reminder", issueNumber: reminder[1], severity: reminder[2] || null };
   if (body.trim() === formats.photoRequest) return { kind: "photo_request" };
-  if (firstLine.startsWith(formats.picQuestionPrefix)) return { kind: "pic_question" };
+  if (firstLine.startsWith(formats.picQuestionPrefix) || (formats.picQuestionText && firstLine.includes(formats.picQuestionText))) return { kind: "pic_question" };
   return { kind: "message" };
 }
 

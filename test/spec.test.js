@@ -89,3 +89,8 @@ test("GET /domains/safety/prompt: a self-contained section, nothing generic in i
   assert.ok((await handle("GET", "/domains/safety/prompt", { requiresSeverity: "true" })).body.intents.includes("safety.new_issue_missing_severity"));
   assert.strictEqual(r.body.corrections.deletion.closure, "deleted_closure");
 });
+
+test("both wordings of the desk's person-in-charge question are recognised", () => {
+  assert.strictEqual(recogniseSystemMessage("👤 Who should this safety issue be assigned to?").kind, "pic_question");
+  assert.strictEqual(recogniseSystemMessage("⚠️ Who will be in charge of this safety issue?\n\nPlease *reply to this message*").kind, "pic_question");
+});

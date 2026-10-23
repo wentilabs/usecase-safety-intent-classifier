@@ -115,9 +115,13 @@ const SAFETY_DOMAIN = {
     },
     {
       id: "pic_answer",
-      meaning: "Answers the desk's question about who is responsible for an issue, by naming or @mentioning a person.",
-      signals: ["replies to the desk's person-in-charge question", "names a person, often with a phone number, or @mentions them"],
-      notWhen: ["it does not name anyone"],
+      meaning: "Answers the desk's question about who is responsible for an issue: by naming or @mentioning someone, or by the sender taking it on themselves.",
+      signals: [
+        "replies to the desk's person-in-charge question",
+        "names a person, often with a phone number, or @mentions them",
+        "or the sender takes charge — 'I'll handle it', 'I'll update the photos once done' — which makes the sender the person responsible",
+      ],
+      notWhen: ["nobody is named and the sender does not take it on (a question back, 'noted', a complaint)"],
       requires: { all: { "message.isReply": true, "quoted.systemMessage": "pic_question" } },
     },
 
@@ -189,6 +193,7 @@ const SAFETY_DOMAIN = {
     { message: 'Photo: "settled"', facts: "replies to a recorded CLOSED issue", intent: "late_after_photo", why: "Evidence for an issue that was closed without it." },
     { message: '"same again"', facts: "replies to a recorded CLOSED issue", intent: "recurrence", why: "The same problem has come back." },
     { message: '"Mohamed Shafiee 6591234567"', facts: "replies to the desk's '👤 Who should this safety issue be assigned to?'", intent: "pic_answer", why: "Names the person responsible." },
+    { message: '"I\'ll update the photos once the cutting is done"', facts: "replies to the desk's '⚠️ Who will be in charge of this safety issue?'", intent: "pic_answer", why: "The sender takes it on, so the sender is the person responsible." },
     { message: '"will settle by tmr"', facts: "replies to a recorded OPEN issue", intent: "other", why: "A promise is not a fix." },
     { message: 'Photo: "CGW night shift housekeeping done, area cleared"', facts: "fresh message, photo attached", intent: "other", why: "A record of work done, not a condition to put right; another team may take it." },
     { message: '"Lightning alert CAT 1 now. Stop all lifting, all workers take shelter"', facts: "fresh message, no photo", intent: "other", why: "An advisory about the weather, not a condition on site." },
