@@ -1,26 +1,348 @@
-{"cases":[
-{"id":"a5-template-terse","source":"probe","message":{"type":"image","body":"Company: CGW\nLocation: L3 zone 1\nDescription: abc\nSeverity: P3\nNovade Tag: Daily WSHE Inspection\nPic: @6591234567"},"photo":{"shows":"A concrete floor area on a construction site."},"expected":"create_issue","note":"A5: a filled template always files"},
-{"id":"inspection-finding","source":"probe","message":{"type":"image","body":"Inspection: WSHE Daily site inspection\nLocation: Level-6 zone 2, inside the CW scaffold platform\nDescription: Observed poor housekeeping"},"photo":{"shows":"Scaffold platform with scattered debris and loose materials."},"expected":"create_issue"},
-{"id":"cj-hazard","source":"probe","message":{"type":"image","body":"rebar protruding at CJ13, no caps"},"photo":{"shows":"Exposed vertical rebar ends without protective caps."},"expected":"create_issue"},
-{"id":"cj-progress","source":"probe","message":{"type":"image","body":"CJ 11 hacking finished"},"photo":{"shows":"A pile cap after concrete hacking, workers nearby."},"expected":"no_action","note":"pile-cap progress, another domain"},
-{"id":"gate-cleaned","source":"probe","message":{"type":"image","body":"Vehicles entry exit gate-9 cleaned"},"photo":{"shows":"A clean, swept vehicle gate entrance."},"expected":"create_issue","note":"B1 exception: completed housekeeping = good observation"},
-{"id":"health-check","source":"probe","message":{"type":"image","body":"Crane operator blood pressure check done before work, 128/82"},"photo":{"shows":"A worker having blood pressure measured with a cuff."},"expected":"create_issue","note":"A3 health check"},
-{"id":"vector-fogging","source":"probe","message":{"type":"image","body":"Vector fogging carried out at worker rest area"},"photo":{"shows":"A worker fogging near a sheltered rest area."},"expected":"create_issue"},
-{"id":"ppe-distribution","source":"probe","message":{"type":"image","body":"New safety helmets issued to LT Sambo workers"},"photo":{"shows":"Workers receiving new hard hats."},"expected":"create_issue"},
-{"id":"access-policy","source":"probe","message":{"type":"chat","body":"From tomorrow gate 3 is for concrete trucks only, workers use gate 1"},"photo":false,"expected":"no_action"},
-{"id":"bare-fragment-deferred","source":"probe","message":{"type":"chat","body":"@6591234567 with fire extinguisher"},"photo":false,"deferredAnchor":true,"expected":"no_action","note":"bare fragment as deferred caption"},
-{"id":"tbm-report-hazards","source":"probe","message":{"type":"image","body":"LT SAMBO Daily TBM Report\nManpower:- Site Engineer :-02, Foreman :-04\nTotal Manpower =189\nHazard: 1. Falling from height 2. Struck by moving vehicle\nControl measures: full body harness, traffic marshal"},"photo":{"shows":"Workers gathered for a morning toolbox meeting."},"expected":"no_action","note":"manpower domain; hazard section is briefing content"},
-{"id":"inspection-report-remarks","source":"probe","message":{"type":"image","body":"Sharing today's lifting gear inspection checklist"},"photo":{"shows":"A paper checklist form with a Remarks column listing two worn slings."},"expected":"no_action","note":"text-driven: don't mine documents for defects"},
-{"id":"pdf-document","source":"probe","message":{"type":"document","body":"CamScanner 22-10-2026 14.03.pdf"},"photo":false,"expected":"no_action"},
-{"id":"site-plan","source":"probe","message":{"type":"image","body":"Revised traffic route for tomorrow's casting"},"photo":{"shows":"A site plan drawing with arrows marking a vehicle route."},"expected":"no_action"},
-{"id":"wbgt-meter","source":"probe","message":{"type":"image","body":""},"photo":{"shows":"A handheld WBGT heat stress meter displaying 31.2."},"expected":"no_action","note":"WBGT domain"},
-{"id":"water-parade-instruction","source":"probe","message":{"type":"chat","body":"@6591234567 pls conduct water parade and 15 minit rest, share photo here"},"photo":false,"expected":"no_action"},
-{"id":"discussion-question","source":"probe","message":{"type":"chat","body":"how many open safety issues for CGW this week?"},"photo":false,"expected":"no_action"},
-{"id":"wbgt-alert","source":"probe","message":{"type":"chat","body":"🟢 *WBGT Reading:* 27.8°C (Below 31°C)\n*Heat Stress Level:* Low\n*Health Advisory:* Drink water regularly"},"photo":false,"expected":"no_action"},
-{"id":"noise-alert","source":"probe","message":{"type":"chat","body":"🔊 Noise exceedance: 78.2 dBA at Sensor N3 (limit 75) 14:00-14:05"},"photo":false,"expected":"no_action"},
-{"id":"tidy-directive","source":"probe","message":{"type":"image","body":"@6591234567 Please tidy up"},"photo":{"shows":"Messy material storage with planks and pipes strewn on the floor."},"expected":"create_issue"},
-{"id":"singlish-directive","source":"probe","message":{"type":"image","body":"@6591234567 shift ur material back to ur work area bro"},"photo":{"shows":"Materials piled across a walkway."},"expected":"create_issue"},
-{"id":"safety-walk","source":"probe","message":{"type":"image","body":"PM safety walk with subcons this morning"},"photo":{"shows":"A group in PPE walking through the site with a clipboard."},"expected":"create_issue","note":"A3 safety walk"},
-{"id":"near-miss","source":"probe","message":{"type":"chat","body":"Near miss at L5, a plank fell from scaffold, nobody hurt"},"photo":false,"expected":"ask_for_photo"},
-{"id":"personnel-escort","source":"probe","message":{"type":"image","body":"1 Hilti personnel heading to CJ1 escorted by WH"},"photo":{"shows":"Two people walking along a site road."},"expected":"no_action"}
-]}
+{
+ "cases": [
+  {
+   "id": "a5-template-terse",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "Company: CGW\nLocation: L3 zone 1\nDescription: abc\nSeverity: P3\nNovade Tag: Daily WSHE Inspection\nPic: @6591234567"
+   },
+   "photo": {
+    "shows": "A concrete floor area on a construction site."
+   },
+   "expected": "no_action",
+   "note": "decided 2026-10-23: a template whose description names nothing is not a report"
+  },
+  {
+   "id": "inspection-finding",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "Inspection: WSHE Daily site inspection\nLocation: Level-6 zone 2, inside the CW scaffold platform\nDescription: Observed poor housekeeping"
+   },
+   "photo": {
+    "shows": "Scaffold platform with scattered debris and loose materials."
+   },
+   "expected": "create_issue"
+  },
+  {
+   "id": "cj-hazard",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "rebar protruding at CJ13, no caps"
+   },
+   "photo": {
+    "shows": "Exposed vertical rebar ends without protective caps."
+   },
+   "expected": "create_issue"
+  },
+  {
+   "id": "cj-progress",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "CJ 11 hacking finished"
+   },
+   "photo": {
+    "shows": "A pile cap after concrete hacking, workers nearby."
+   },
+   "expected": "no_action",
+   "note": "pile-cap progress, another domain"
+  },
+  {
+   "id": "gate-cleaned",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "Vehicles entry exit gate-9 cleaned"
+   },
+   "photo": {
+    "shows": "A clean, swept vehicle gate entrance."
+   },
+   "expected": "create_issue",
+   "note": "B1 exception: completed housekeeping = good observation"
+  },
+  {
+   "id": "health-check",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "Crane operator blood pressure check done before work, 128/82"
+   },
+   "photo": {
+    "shows": "A worker having blood pressure measured with a cuff."
+   },
+   "expected": "create_issue",
+   "note": "A3 health check"
+  },
+  {
+   "id": "vector-fogging",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "Vector fogging carried out at worker rest area"
+   },
+   "photo": {
+    "shows": "A worker fogging near a sheltered rest area."
+   },
+   "expected": "create_issue"
+  },
+  {
+   "id": "ppe-distribution",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "New safety helmets issued to LT Sambo workers"
+   },
+   "photo": {
+    "shows": "Workers receiving new hard hats."
+   },
+   "expected": "create_issue"
+  },
+  {
+   "id": "access-policy",
+   "source": "probe",
+   "message": {
+    "type": "chat",
+    "body": "From tomorrow gate 3 is for concrete trucks only, workers use gate 1"
+   },
+   "photo": false,
+   "expected": "no_action"
+  },
+  {
+   "id": "bare-fragment-deferred",
+   "source": "probe",
+   "message": {
+    "type": "chat",
+    "body": "@6591234567 with fire extinguisher"
+   },
+   "photo": false,
+   "deferredAnchor": true,
+   "expected": null,
+   "note": "decided 2026-10-23: depends on context; with none, either reading is defensible"
+  },
+  {
+   "id": "tbm-report-hazards",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "LT SAMBO Daily TBM Report\nManpower:- Site Engineer :-02, Foreman :-04\nTotal Manpower =189\nHazard: 1. Falling from height 2. Struck by moving vehicle\nControl measures: full body harness, traffic marshal"
+   },
+   "photo": {
+    "shows": "Workers gathered for a morning toolbox meeting."
+   },
+   "expected": "no_action",
+   "note": "manpower domain; hazard section is briefing content"
+  },
+  {
+   "id": "inspection-report-remarks",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "Sharing today's lifting gear inspection checklist"
+   },
+   "photo": {
+    "shows": "A paper checklist form with a Remarks column listing two worn slings."
+   },
+   "expected": "no_action",
+   "note": "text-driven: don't mine documents for defects"
+  },
+  {
+   "id": "pdf-document",
+   "source": "probe",
+   "message": {
+    "type": "document",
+    "body": "CamScanner 22-10-2026 14.03.pdf"
+   },
+   "photo": false,
+   "expected": "no_action"
+  },
+  {
+   "id": "site-plan",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "Revised traffic route for tomorrow's casting"
+   },
+   "photo": {
+    "shows": "A site plan drawing with arrows marking a vehicle route."
+   },
+   "expected": "no_action"
+  },
+  {
+   "id": "wbgt-meter",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": ""
+   },
+   "photo": {
+    "shows": "A handheld WBGT heat stress meter displaying 31.2."
+   },
+   "expected": "no_action",
+   "note": "WBGT domain"
+  },
+  {
+   "id": "water-parade-instruction",
+   "source": "probe",
+   "message": {
+    "type": "chat",
+    "body": "@6591234567 pls conduct water parade and 15 minit rest, share photo here"
+   },
+   "photo": false,
+   "expected": "no_action"
+  },
+  {
+   "id": "discussion-question",
+   "source": "probe",
+   "message": {
+    "type": "chat",
+    "body": "how many open safety issues for CGW this week?"
+   },
+   "photo": false,
+   "expected": "no_action"
+  },
+  {
+   "id": "wbgt-alert",
+   "source": "probe",
+   "message": {
+    "type": "chat",
+    "body": "🟢 *WBGT Reading:* 27.8°C (Below 31°C)\n*Heat Stress Level:* Low\n*Health Advisory:* Drink water regularly"
+   },
+   "photo": false,
+   "expected": "no_action"
+  },
+  {
+   "id": "noise-alert",
+   "source": "probe",
+   "message": {
+    "type": "chat",
+    "body": "🔊 Noise exceedance: 78.2 dBA at Sensor N3 (limit 75) 14:00-14:05"
+   },
+   "photo": false,
+   "expected": "no_action"
+  },
+  {
+   "id": "tidy-directive",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "@6591234567 Please tidy up"
+   },
+   "photo": {
+    "shows": "Messy material storage with planks and pipes strewn on the floor."
+   },
+   "expected": "create_issue"
+  },
+  {
+   "id": "singlish-directive",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "@6591234567 shift ur material back to ur work area bro"
+   },
+   "photo": {
+    "shows": "Materials piled across a walkway."
+   },
+   "expected": "create_issue"
+  },
+  {
+   "id": "safety-walk",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "PM safety walk with subcons this morning"
+   },
+   "photo": {
+    "shows": "A group in PPE walking through the site with a clipboard."
+   },
+   "expected": "create_issue",
+   "note": "A3 safety walk"
+  },
+  {
+   "id": "near-miss",
+   "source": "probe",
+   "message": {
+    "type": "chat",
+    "body": "Near miss at L5, a plank fell from scaffold, nobody hurt"
+   },
+   "photo": false,
+   "expected": "ask_for_photo"
+  },
+  {
+   "id": "personnel-escort",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "1 Hilti personnel heading to CJ1 escorted by WH"
+   },
+   "photo": {
+    "shows": "Two people walking along a site road."
+   },
+   "expected": "no_action"
+  },
+  {
+   "id": "template-terse-real",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "Company: CGW\nLocation: L3 zone 1\nDescription: No FE\nSeverity: P3\nPic: @6591234567"
+   },
+   "photo": {
+    "shows": "A hot work area with welding equipment."
+   },
+   "expected": "create_issue",
+   "note": "terse but names the situation"
+  },
+  {
+   "id": "one-word-chock",
+   "source": "probe",
+   "message": {
+    "type": "image",
+    "body": "chock??"
+   },
+   "photo": {
+    "shows": "A parked trailer on a slope."
+   },
+   "expected": "create_issue",
+   "note": "one word naming the missing control"
+  },
+  {
+   "id": "fragment-after-hot-work",
+   "source": "probe",
+   "message": {
+    "type": "chat",
+    "body": "@6591234567 with fire extinguisher"
+   },
+   "photo": false,
+   "deferredAnchor": true,
+   "recent": [
+    {
+     "sender": "WSHO",
+     "body": "Hot work at L3 starting now, pls check"
+    }
+   ],
+   "expected": "create_issue",
+   "note": "context makes the fragment a directive about the photo"
+  },
+  {
+   "id": "fragment-answers-question",
+   "source": "probe",
+   "message": {
+    "type": "chat",
+    "body": "@6591234567 with fire extinguisher"
+   },
+   "photo": false,
+   "deferredAnchor": true,
+   "recent": [
+    {
+     "sender": "Foreman",
+     "body": "who is fire watchman for the hot work at L3 later?"
+    }
+   ],
+   "expected": "no_action",
+   "note": "context makes the fragment an answer"
+  }
+ ]
+}
