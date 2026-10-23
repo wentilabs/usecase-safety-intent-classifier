@@ -120,7 +120,8 @@ function toRequest(c) {
         }
       }
       const t = today[c.id];
-      const ok = (intent) => (c.expected ? (ACCEPTS[c.expected] || []).includes(intent) : null);
+      // A real-archive set is labelled with the intents themselves; the older set with actions.
+      const ok = (intent) => (c.expected ? intent === c.expected || (ACCEPTS[c.expected] || []).includes(intent) : null);
       rows.push({ id: c.id, source: c.source, shape: c.shape, expected: c.expected || null, vetted: Boolean(c.vetting), answers, newOk: c.expected ? answers.every((a) => ok(a.intent)) : null, stable: new Set(answers.map((a) => a.intent)).size === 1, today: t ? t.today : null, todayOk: t && c.expected ? t.today === c.expected : null, text: (m => `${m.type === "image" ? "📷 " : ""}${m.body || ""}`)(c.message || {}) });
       process.stderr.write(".");
     }));
