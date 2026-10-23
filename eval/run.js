@@ -96,9 +96,9 @@ function toRequest(c) {
     ...(isReply
       ? { quoted: c.deferredAnchor
           ? { sender: "Site staff", type: "image", body: "" }
-          : { sender: c.quoted && c.quoted.fromThisSystem ? "Safety desk" : "Supervisor", body: quotedText, type: c.quoted && c.quoted.photo ? "image" : "chat", fromThisSystem: c.quoted ? c.quoted.fromThisSystem ?? null : null } }
+          : { sender: c.quoted && c.quoted.fromThisSystem ? "Safety desk" : "Supervisor", body: quotedText, type: c.quoted && c.quoted.photo ? "image" : "chat", fromThisSystem: c.quoted ? c.quoted.fromThisSystem ?? null : null, ...(c.quoted && c.quoted.at ? { at: c.quoted.at } : {}) } }
       : { quoted: null }),
-    recent: (c.recent || []).map((r, i) => ({ sender: r.sender || "Site staff", type: r.type || "chat", body: r.body || "", ...(r.fromThisSystem ? { fromThisSystem: true } : {}) })),
+    recent: (c.recent || []).map((r, i) => ({ sender: r.sender || "Site staff", type: r.type || "chat", body: r.body || "", ...(r.at ? { at: r.at } : {}), ...(r.fromThisSystem ? { fromThisSystem: true } : {}) })),
     facts,
   };
 }
